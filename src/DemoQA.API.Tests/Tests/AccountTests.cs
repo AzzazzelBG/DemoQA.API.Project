@@ -37,7 +37,7 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov1234",
+                Username = "PetarPetrov12345",
                 Password = "Pasword1!",
             });
 
@@ -46,7 +46,7 @@ namespace DemoQA.API.Tests
 
         #region GenerateToken POST Endpoint Tests
 
-        [Test]
+        [Test, Order(1)]
         public async Task User_Should_Be_Able_To_Generate_Token_Successfully()
         {
             var request = new RestRequest("Account/v1/GenerateToken", Method.POST, DataFormat.Json)
@@ -56,7 +56,7 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov1234",
+                Username = "PetarPetrov12345",
                 Password = "Pasword1!",
             });
 
@@ -65,7 +65,7 @@ namespace DemoQA.API.Tests
             Assert.True(!string.IsNullOrEmpty(response.Token));
         }
 
-        [Test]
+        [Test, Order(2)]
         public async Task User_Cannot_Generate_Token_With_Empty_Values()
         {
             var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
@@ -86,7 +86,7 @@ namespace DemoQA.API.Tests
 
         // This test fails intentionally!
         // When the user is not found it should not return success code and model!
-        [Test]
+        [Test, Order(3)]
         public async Task User_Cannot_Generate_With_Incorrect_Username_Or_Password_Proper_Error_Code_Appears()
         {
             var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
@@ -96,7 +96,7 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov1234",
+                Username = "PetarPetrov12345",
                 Password = "1122334"
             });
 
@@ -107,7 +107,7 @@ namespace DemoQA.API.Tests
 
         // This test fails intentionally!
         // When the user is not found it should not return success code and model!
-        [Test]
+        [Test, Order(4)]
         public async Task User_Cannot_Generate_With_Incorrect_Username_Or_Password_Proper_Error_Message_Appears()
         {
             var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
@@ -126,7 +126,7 @@ namespace DemoQA.API.Tests
             Assert.AreEqual("User not found!", response.Message);
         }
 
-        [Test]
+        [Test, Order(5)]
         public async Task User_Cannot_Generate_With_Empty_Values_Proper_Status_Code_Appears()
         {
             var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
@@ -149,7 +149,7 @@ namespace DemoQA.API.Tests
 
         #region Authorized POST Endpoint tests
 
-        [Test]
+        [Test, Order(6)]
         public async Task User_Should_Be_Able_To_Authorize_Successfully()
         {
             var request = new RestRequest("/Account/v1/Authorized", Method.POST, DataFormat.Json)
@@ -159,7 +159,7 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov1234",
+                Username = "PetarPetrov12345",
                 Password = "Pasword1!",
             });
 
