@@ -84,6 +84,67 @@ namespace DemoQA.API.Tests
             Assert.AreEqual("UserName and Password required.", response.Message);
         }
 
+        // This test fails intentionally!
+        // When the user is not found it should not return success code and model!
+        [Test]
+        public async Task User_Cannot_Generate_With_Incorrect_Username_Or_Password_Proper_Error_Code_Appears()
+        {
+            var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
+            {
+                JsonSerializer = new JsonNetSerializer()
+            };
+
+            request.AddJsonBody(new GenerateTokenRequestModel()
+            {
+                Username = "PetarPetrov1234",
+                Password = "1122334"
+            });
+
+            var response = await _unAuthenticatedRestClient.Client.ExecuteAsync(request);
+
+            Assert.True(response.StatusCode == HttpStatusCode.NotFound);
+        }
+
+        // This test fails intentionally!
+        // When the user is not found it should not return success code and model!
+        [Test]
+        public async Task User_Cannot_Generate_With_Incorrect_Username_Or_Password_Proper_Error_Message_Appears()
+        {
+            var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
+            {
+                JsonSerializer = new JsonNetSerializer()
+            };
+
+            request.AddJsonBody(new GenerateTokenRequestModel()
+            {
+                Username = "gfsafdgsd",
+                Password = "Pasword1!"
+            });
+
+            var response = await _unAuthenticatedRestClient.Client.PostAsync<ErrorModel>(request);
+
+            Assert.AreEqual("User not found!", response.Message);
+        }
+
+        [Test]
+        public async Task User_Cannot_Generate_With_Empty_Values_Proper_Status_Code_Appears()
+        {
+            var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
+            {
+                JsonSerializer = new JsonNetSerializer()
+            };
+
+            request.AddJsonBody(new GenerateTokenRequestModel()
+            {
+                Username = "",
+                Password = "Pasword1!",
+            });
+
+            var response = await _unAuthenticatedRestClient.Client.ExecuteAsync(request);
+
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
         #endregion
 
         #region Authorized POST Endpoint tests
