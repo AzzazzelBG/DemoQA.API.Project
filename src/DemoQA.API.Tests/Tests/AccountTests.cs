@@ -37,8 +37,8 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov12345",
-                Password = "Pasword1!",
+                Username = "GeorgiGeorgiev",
+                Password = "Pasword11!",
             });
 
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<GenerateTokenResponseModel>(request);
@@ -46,8 +46,8 @@ namespace DemoQA.API.Tests
 
         #region GenerateToken POST Endpoint Tests
 
-        [Test, Order(1)]
-        public async Task User_Should_Be_Able_To_Generate_Token_Successfully()
+        [TestCase("GeorgiGeorgiev", "Pasword11!"), Order(1)]
+        public async Task User_Should_Be_Able_To_Generate_Token_Successfully(string username, string password)
         {
             var request = new RestRequest("Account/v1/GenerateToken", Method.POST, DataFormat.Json)
             {
@@ -56,8 +56,8 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov12345",
-                Password = "Pasword1!",
+                Username = username,
+                Password = password,
             });
 
             var response = await _unAuthenticatedRestClient.Client.PostAsync<GenerateTokenResponseModel>(request);
@@ -66,7 +66,9 @@ namespace DemoQA.API.Tests
         }
 
         [Test, Order(2)]
-        public async Task User_Cannot_Generate_Token_With_Empty_Values()
+        [TestCase("", "Pasword11!", "UserName and Password required.")]
+        [TestCase("GeorgiGeorgiev", "", "UserName and Password required.")]
+        public async Task User_Cannot_Generate_Token_With_Empty_Values(string username, string password, string errorMessage)
         {
             var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
             {
@@ -75,19 +77,21 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "",
-                Password = "Pasword1!",
+                Username = username,
+                Password = password,
             });
 
             var response = await _unAuthenticatedRestClient.Client.PostAsync<ErrorModel>(request);
 
-            Assert.AreEqual("UserName and Password required.", response.Message);
+            Assert.AreEqual(errorMessage, response.Message);
         }
 
         // This test fails intentionally!
         // When the user is not found it should not return success code and model!
         [Test, Order(3)]
-        public async Task User_Cannot_Generate_With_Incorrect_Username_Or_Password_Proper_Error_Code_Appears()
+        [TestCase("", "Pasword11!", HttpStatusCode.NotFound)]
+        [TestCase("GeorgiGeorgiev", "", HttpStatusCode.NotFound)]
+        public async Task User_Cannot_Generate_With_Incorrect_Username_Or_Password_Proper_Error_Code_Appears(string username, string password, HttpStatusCode httpStatusCode)
         {
             var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
             {
@@ -96,19 +100,21 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov12345",
-                Password = "1122334"
+                Username = username,
+                Password = password
             });
 
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync(request);
 
-            Assert.True(response.StatusCode == HttpStatusCode.NotFound);
+            Assert.True(response.StatusCode == httpStatusCode);
         }
 
         // This test fails intentionally!
         // When the user is not found it should not return success code and model!
         [Test, Order(4)]
-        public async Task User_Cannot_Generate_With_Incorrect_Username_Or_Password_Proper_Error_Message_Appears()
+        [TestCase("AlaBalaTest", "Pasword1!", "User not found!")]
+        [TestCase("GeorgiGeorgiev", "AlaBalaTest", "User not found!")]
+        public async Task User_Cannot_Generate_With_Incorrect_Username_Or_Password_Proper_Error_Message_Appears(string username, string password, string errorMessage)
         {
             var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
             {
@@ -117,17 +123,19 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "gfsafdgsd",
-                Password = "Pasword1!"
+                Username = username,
+                Password = password
             });
 
             var response = await _unAuthenticatedRestClient.Client.PostAsync<ErrorModel>(request);
 
-            Assert.AreEqual("User not found!", response.Message);
+            Assert.AreEqual(errorMessage, response.Message);
         }
 
         [Test, Order(5)]
-        public async Task User_Cannot_Generate_With_Empty_Values_Proper_Status_Code_Appears()
+        [TestCase("", "Pasword1!")]
+        [TestCase("GeorgiGeorgiev", "")]
+        public async Task User_Cannot_Generate_With_Empty_Values_Proper_Status_Code_Appears(string username, string password)
         {
             var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
             {
@@ -136,8 +144,8 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "",
-                Password = "Pasword1!",
+                Username = username,
+                Password = password,
             });
 
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync(request);
@@ -150,7 +158,8 @@ namespace DemoQA.API.Tests
         #region Authorized POST Endpoint tests
 
         [Test, Order(6)]
-        public async Task User_Should_Be_Able_To_Authorize_Successfully()
+        [TestCase("GeorgiGeorgiev", "Pasword11!")]
+        public async Task User_Should_Be_Able_To_Authorize_Successfully(string username, string password)
         {
             var request = new RestRequest("/Account/v1/Authorized", Method.POST, DataFormat.Json)
             {
@@ -159,8 +168,8 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov12345",
-                Password = "Pasword1!",
+                Username = username,
+                Password = password,
             });
 
             var
