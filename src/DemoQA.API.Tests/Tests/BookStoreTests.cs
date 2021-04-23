@@ -4,10 +4,7 @@ using DemoQA.HttpClients;
 using NUnit.Framework;
 using RestSharp;
 using RestSharp.Serializers.NewtonsoftJson;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DemoQA.API.Tests
@@ -24,8 +21,8 @@ namespace DemoQA.API.Tests
         }
 
         #region Books GET Endpoint Tests
-        [Test]
-        public async Task User_Can_See_All_Books_In_The_Book_Store()
+        [TestCase(8)]
+        public async Task User_Can_See_All_Books_In_The_Book_Store(int booksNumber)
         {
             var request = new RestRequest("/BookStore/v1/Books", Method.GET, DataFormat.Json)
             {
@@ -34,11 +31,11 @@ namespace DemoQA.API.Tests
 
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<AllBooksResponseModel>(request);
 
-            Assert.True(response.Data.Books.Count == 8);
+            Assert.True(response.Data.Books.Count == booksNumber);
         }
 
-        [Test]
-        public async Task User_Should_Receive_Proper_Status_Code_When_Access_All_Books()
+        [TestCase(HttpStatusCode.OK)]
+        public async Task User_Should_Receive_Proper_Status_Code_When_Access_All_Books(HttpStatusCode httpStatusCode)
         {
             var request = new RestRequest("/BookStore/v1/Books", Method.GET, DataFormat.Json)
             {
@@ -47,41 +44,43 @@ namespace DemoQA.API.Tests
 
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<AllBooksResponseModel>(request);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual(httpStatusCode, response.StatusCode);
         }
 
         #endregion
 
+        
         #region Book GET Endpoint Tests
 
-        [Test]
-        public async Task User_Can_Access_Specific_Book_By_Isbn()
+        [TestCase("9781449365035", "Speaking JavaScript")]
+        [TestCase("9781449331818", "Learning JavaScript Design Patterns")]
+        public async Task User_Can_Access_Specific_Book_By_Isbn(string isbn, string bookTitle)
         {
             var request = new RestRequest("/BookStore/v1/Book", Method.GET, DataFormat.Json)
             {
                 JsonSerializer = new JsonNetSerializer()
             };
 
-            request.AddQueryParameter("ISBN", "9781449325862");
+            request.AddQueryParameter("ISBN", isbn);
 
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<BookResponseModel>(request);
 
-            Assert.AreEqual("9781449325862", response.Data.Isbn);
+            Assert.AreEqual(bookTitle, response.Data.Title);
         }
 
-        [Test]
-        public async Task User_Receives_Proper_Error_Message_If_Isbn_Is_Incorrect()
+        [TestCase("9781449325", "ISBN supplied is not available in Books Collection!")]
+        public async Task User_Receives_Proper_Error_Message_If_Isbn_Is_Incorrect(string incorrectIsbn, string errorMessage)
         {
             var request = new RestRequest("/BookStore/v1/Book", Method.GET, DataFormat.Json)
             {
                 JsonSerializer = new JsonNetSerializer()
             };
 
-            request.AddQueryParameter("ISBN", "9781449325");
+            request.AddQueryParameter("ISBN", incorrectIsbn);
 
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<ErrorModel>(request);
 
-            Assert.AreEqual("ISBN supplied is not available in Books Collection!", response.Data.Message);
+            Assert.AreEqual(errorMessage, response.Data.Message);
         }
 
         [TestCase("9781449325862", HttpStatusCode.OK)]
