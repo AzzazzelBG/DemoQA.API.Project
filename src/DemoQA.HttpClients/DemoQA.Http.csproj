@@ -7,6 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="RestSharp" Version="106.11.7" />
+    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.11.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DemoQA.Core\DemoQA.Core.csproj" />
   </ItemGroup>
 
 </Project>
