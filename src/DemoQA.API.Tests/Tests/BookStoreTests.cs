@@ -1,10 +1,12 @@
-﻿using DemoQA.Core.Models.BookStore.ResponseModels;
+﻿using DemoQA.Core.Models.BookStore.RequestModels;
+using DemoQA.Core.Models.BookStore.ResponseModels;
 using DemoQA.HttpClients;
 using NUnit.Framework;
 using RestSharp;
 using RestSharp.Serializers.NewtonsoftJson;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +23,7 @@ namespace DemoQA.API.Tests
             _unAuthenticatedRestClient = new UnAuthenticatedRestClient(baseUrl);
         }
 
+        #region Books GET Endpoint Tests
         [Test]
         public async Task User_Can_See_All_Books_In_The_Book_Store()
         {
@@ -32,7 +35,41 @@ namespace DemoQA.API.Tests
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<AllBooksResponseModel>(request);
 
             Assert.True(response.Data.Books.Count == 8);
-
         }
+
+        [Test]
+        public async Task User_Should_Receive_Proper_Status_Code_When_Access_All_Books()
+        {
+            var request = new RestRequest("/BookStore/v1/Books", Method.GET, DataFormat.Json)
+            {
+                JsonSerializer = new JsonNetSerializer()
+            };
+
+            var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<AllBooksResponseModel>(request);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        #endregion
+
+        #region Book GET Endpoint Tests
+
+        [Test]
+        public async Task User_Can_Access_Specific_Book_By_Isbn()
+        {
+            var request = new RestRequest("/BookStore/v1/Book", Method.GET, DataFormat.Json)
+            {
+                JsonSerializer = new JsonNetSerializer()
+            };
+
+            request.AddQueryParameter("ISBN", "9781449325862");
+
+            var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<BookResponseModel>(request);
+
+            Assert.AreEqual("9781449325862", response.Data.Isbn);
+        }
+
+        #endregion
+
     }
 }
