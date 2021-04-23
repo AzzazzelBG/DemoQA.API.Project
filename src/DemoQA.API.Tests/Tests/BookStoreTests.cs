@@ -1,5 +1,5 @@
-﻿using DemoQA.Core.Models.BookStore.RequestModels;
-using DemoQA.Core.Models.BookStore.ResponseModels;
+﻿using DemoQA.Core.Models.BookStore.ResponseModels;
+using DemoQA.Core.Models.Error;
 using DemoQA.HttpClients;
 using NUnit.Framework;
 using RestSharp;
@@ -67,6 +67,37 @@ namespace DemoQA.API.Tests
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<BookResponseModel>(request);
 
             Assert.AreEqual("9781449325862", response.Data.Isbn);
+        }
+
+        [Test]
+        public async Task User_Receives_Proper_Error_Message_If_Isbn_Is_Incorrect()
+        {
+            var request = new RestRequest("/BookStore/v1/Book", Method.GET, DataFormat.Json)
+            {
+                JsonSerializer = new JsonNetSerializer()
+            };
+
+            request.AddQueryParameter("ISBN", "9781449325");
+
+            var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<ErrorModel>(request);
+
+            Assert.AreEqual("ISBN supplied is not available in Books Collection!", response.Data.Message);
+        }
+
+        [TestCase("9781449325862", HttpStatusCode.OK)]
+        [TestCase("97814493262", HttpStatusCode.BadRequest)]
+        public async Task User_Receives_Proper_Status_Code_After_Request(string isbn, HttpStatusCode httpStatusCode)
+        {
+            var request = new RestRequest("/BookStore/v1/Book", Method.GET, DataFormat.Json)
+            {
+                JsonSerializer = new JsonNetSerializer()
+            };
+
+            request.AddQueryParameter("ISBN", isbn);
+
+            var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<ErrorModel>(request);
+
+            Assert.AreEqual(httpStatusCode, response.StatusCode);
         }
 
         #endregion
