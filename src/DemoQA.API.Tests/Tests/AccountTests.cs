@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using RestSharp.Serializers.NewtonsoftJson;
 using DemoQA.Core;
 using DemoQA.Core.Models.Account.ResponseModels;
+using DemoQA.Core.Models.Error;
 
 namespace DemoQA.API.Tests
 {
@@ -21,13 +22,13 @@ namespace DemoQA.API.Tests
             _unAuthenticatedRestClient = new UnAuthenticatedRestClient(baseUrl);
         }
 
-        [SetUp]
+        [OneTimeSetUp]
         public async Task Setup()
         {
-            await Creation_Of_Users_Should_Be_Successfull_With_Right_Status_Code();
+            await Creation_Of_User();
         }
 
-        public async Task Creation_Of_Users_Should_Be_Successfull_With_Right_Status_Code()
+        public async Task Creation_Of_User()
         {
             var request = new RestRequest("/Account/v1/User", Method.POST, DataFormat.Json)
             {
@@ -36,12 +37,14 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov123",
+                Username = "PetarPetrov1234",
                 Password = "Pasword1!",
             });
 
             var response = await _unAuthenticatedRestClient.Client.ExecuteAsync<GenerateTokenResponseModel>(request);
         }
+
+        #region GenerateToken POST Endpoint Tests
 
         [Test]
         public async Task User_Should_Be_Able_To_Generate_Token_Successfully()
@@ -53,7 +56,7 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov123",
+                Username = "PetarPetrov1234",
                 Password = "Pasword1!",
             });
 
@@ -61,6 +64,29 @@ namespace DemoQA.API.Tests
 
             Assert.True(!string.IsNullOrEmpty(response.Token));
         }
+
+        [Test]
+        public async Task User_Cannot_Generate_Token_With_Empty_Values()
+        {
+            var request = new RestRequest("/Account/v1/GenerateToken", Method.POST, DataFormat.Json)
+            {
+                JsonSerializer = new JsonNetSerializer()
+            };
+
+            request.AddJsonBody(new GenerateTokenRequestModel()
+            {
+                Username = "",
+                Password = "Pasword1!",
+            });
+
+            var response = await _unAuthenticatedRestClient.Client.PostAsync<ErrorModel>(request);
+
+            Assert.AreEqual("UserName and Password required.", response.Message);
+        }
+
+        #endregion
+
+        #region Authorized POST Endpoint tests
 
         [Test]
         public async Task User_Should_Be_Able_To_Authorize_Successfully()
@@ -72,7 +98,7 @@ namespace DemoQA.API.Tests
 
             request.AddJsonBody(new GenerateTokenRequestModel()
             {
-                Username = "PetarPetrov123",
+                Username = "PetarPetrov1234",
                 Password = "Pasword1!",
             });
 
@@ -81,5 +107,7 @@ namespace DemoQA.API.Tests
 
             Assert.AreEqual("true", response.Content);
         }
+
+        #endregion
     }
 }
